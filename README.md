@@ -85,6 +85,9 @@ ggplot(data, aes(x = catBL, y = viral_entry)) +
   labs(title = "Simulation of Effect of CatB/L Activity on SARS-CoV-2 Viral Entry", x = "CatB/L Activity", y = "Viral Entry (%)")
 ```
 
+![image](ANOVA_plot.png)
+
+
 ## 9. Monte Carlo Simulations
 Because I want my experiment to be unbiased, I'll need to run a Monte Carlo analysis in order calculate the sample size necessary to test the hypothesis stated previously. From the results in the code chunk below, it appears that a sample size as small as 3 for each group would be sufficient enough to produce a high power and observe the effect size I'm expecting. 
 
@@ -122,6 +125,10 @@ ggplot(data.frame(pval))+
   geom_histogram(aes(pval), color="#d28e00")+
   labs(x="p-value")
 ```
+
+![image](power_analysis.png)
+![image](monte_carlo.png)
+
 ## 10. Conclusion
 Now, all that's left is to actually go conduct the experiment in the lab! Unfortunately, that might have to wait for another few months... but in the meantime, there's always room for improvement. Using the statistical skills I learned in this course, I can expand my experimental design to include additional factors (such as the amount of ACE2 receptors on host cells) or even measure my predictor variable, the amount of CatB/L activity, in order to perform a regression analysis.
 
