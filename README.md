@@ -47,7 +47,7 @@ a <- 0.5   # fold-to-basal effect of knockout
 f <- 2     # fold-to-basal effect of overexpressed
 sd <- 5    # expected standard deviation of outcome variable
 
-# simulating random-generated data
+# defining dataMaker function
 simulate <- function(n, b, a, f, sd) {
   wt <- rnorm(n, b, sd)     # wildtype
   ko <- rnorm(n, b*a, sd)   # knock-out CatB/L
@@ -64,8 +64,10 @@ simulate <- function(n, b, a, f, sd) {
   mutate(data, id = as.factor(1:(3*n)))
 }
 
+# simulate random-generated data
 data <- simulate(n, b, a, f, sd)
 
+# plotting simulated data
 ggplot(data, aes(x = catBL, y = viral_entry)) +
   geom_jitter(shape=21,
               size = 2,
@@ -87,9 +89,11 @@ ggplot(data, aes(x = catBL, y = viral_entry)) +
 Because I want my experiment to be unbiased, I'll need to run a Monte Carlo analysis in order calculate the sample size necessary to test the hypothesis stated previously. From the results in the code chunk below, it appears that a sample size as small as 3 for each group would be sufficient enough to produce a high power and observe the effect size I'm expecting. 
 
 ```markdown
+# initializing Monte Carlo
 n <- 5
 sims <- 100
 
+# running Monte Carlo simulations
 pval <- replicate(
   sims, {
  
@@ -109,9 +113,11 @@ pval <- replicate(
     }
   )
 
+# printing results of power analysis
 pwr.pct <- sum(pval<0.05)/sims*100
 paste(pwr.pct, sep="", "% power. Change 'n' in your initializer for higher or lower power.")
 
+# plotting results of power analysis
 ggplot(data.frame(pval))+
   geom_histogram(aes(pval), color="#d28e00")+
   labs(x="p-value")
