@@ -19,25 +19,25 @@ However, it is unknown why individuals with preexisting conditions have a higher
 **If CatB/L activity is upregulated in human lung epithelial cells, then SARS-CoV-2 viral entry should increase.**
 
 ## 4. Variables
-The dependent variable in this situation will be the amount of viral entry, which is measured. The predictor variable will be the level of cathepsin activity (ordesred), represented by 3 different  conditions: cells will either be CatB/L knockout, wildtype, or have overexpressed CatB/L activity.
+The dependent variable in this situation will be the amount of viral entry, which is measured. The predictor variable will be the level of cathepsin activity (ordered), represented by 3 different  conditions: cells will either be CatB/L knockout, wildtype (control), or have overexpressed CatB/L activity.
 
 ## 5. Hypothesis
-For this experiment, I will be testing the null statistical hypothesis that the variance associated with different levels of CatB/L activity is less than or equal to the residual variance. The alternate hypothesis is that the variance associated with different levels of CatB/L activity is greater than the residual variance.
+For this experiment, I will be testing the null statistical hypothesis that the group mean of viral entry associated with overexpressed CatB/L activity will be the same as that of the control group. The alternate hypothesis is that the group mean associated with overexpressed CatB/L activity will differ compared to that of the control group.
 
 ## 6. Statistical Test
 With 3 levels of the predictor variable, CatB/L activity, an analysis of variance (ANOVA) is most appropriate. It's obvious that the dependent variable, viral entry, is continuous and measured, and that the predictor variable is discrete and ordered. A one-way completely randomized (CR) ANOVA is the best method to test the hypothesis I've stated above because there is only one factor.
 
-The type 1 error threshold is predetermined to be 5%. The previously stated null hypothesis can be safely rejected if the ANOVA test yields a p-value of less than 0.05.
+It's also worth noting that, in order to test the group means, post hoc analysis will have to be performed in the form of a pairwise t-test with a Bonferroni p-value adjustment method to control type 1 error.
 
 Because there's 3 explanatory groups, regression is one possible alternative to performing ANOVA. However, the major determinant was that the predictor variable is discrete and ordered. Regression models are ideal when the predictor variables are continuous and measured.
 
 ## 7. Experimental Design
-There will be 15 dishes of human lung epithelial cells, each independent of each other. Each one will be randomly assigned to one of three groups: wildtype (control), CatB/L knockout, or overexpressed CatB/L. 
+There will be 15 different passages (or re-establishing the cell line) of human lung epithelial cells, each independent of each other. Each one will be randomly assigned to one of three groups: wildtype (control), CatB/L knockout, or overexpressed CatB/L. The outcome variable, viral entry, will be measured as a percentage representing how much out of total virus has invaded the host cell. 
 
-7) List the procedures and decision rules you have for executing and interpreting the experiment. These procedures range from selection of experimental units, to randomization to primary endpoint to threshold decisions. Define (and defend) what you believe will be the independent replicate.
+The type 1 error threshold is predetermined to be 5%. The previously stated null hypothesis can be safely rejected if the pairwise t-test yields a p-value of less than 0.05 when comparing overexpressed CatB/L to wildtype.
 
 ## 8. Plotting Data
-The function below, *simulate*, will create random-generated data and a bar graph with error bars to plot the data. The only function argument you need to provide is the number of replicates for each group. The expected response should show a significantly higher percent of viral entry for cells overexpressing CatB/L compared to that of wildtype and knockout.
+The function below, *simulate*, will create random-generated data. This data is then plotted with error bars. The only function argument required is the number of replicates (n) for each group. The expected response should show a significantly higher percent of viral entry for cells overexpressing CatB/L compared to that of wildtype and knockout.
 
 ```markdown
 # initializers
@@ -49,7 +49,7 @@ sd <- 5    # expected standard deviation of outcome variable
 
 # defining dataMaker function
 simulate <- function(n, b, a, f, sd) {
-  wt <- rnorm(n, b, sd)     # wildtype
+  wt <- rnorm(n, b, sd*f)     # wildtype
   ko <- rnorm(n, b*a, sd)   # knock-out CatB/L
   oe <- rnorm(n, b*f, sd)   # overexpressed CatB/L
   
@@ -89,11 +89,11 @@ ggplot(data, aes(x = catBL, y = viral_entry)) +
 
 
 ## 9. Monte Carlo Simulations
-Because I want my experiment to be unbiased, I'll need to run a Monte Carlo analysis in order calculate the sample size necessary to test the hypothesis stated previously. From the results in the code chunk below, it appears that a sample size as small as 3 for each group would be sufficient enough to produce a high power and observe the effect size I'm expecting. 
+Because I want my experiment to be unbiased, I'll need to run a Monte Carlo analysis in order calculate the sample size necessary to test the previously stated hypothesis. From the results in the code chunk below, it appears that a minimum sample size of n = 3 for each group would be sufficient enough to produce a power of more than 90% and observe the effect size I'm expecting. 
 
 ```markdown
 # initializing Monte Carlo
-n <- 5
+n <- 3
 sims <- 100
 
 # running Monte Carlo simulations
@@ -102,17 +102,24 @@ pval <- replicate(
  
     sample.df <- simulate(n, b, a, f, sd)
     
-    # one-way CR ANOVA
-    sim.ezaov <- ezANOVA(
-            data = sample.df, 
-            wid = id, 
-            dv = viral_entry, 
-            between = catBL,
-            type = 2, 
-            return_aov = T, 
-            detailed = T)
-  
-  pval <- sim.ezaov$ANOVA$p
+    # # one-way CR ANOVA
+    # sim.ezaov <- ezANOVA(
+    #         data = sample.df, 
+    #         wid = id, 
+    #         dv = viral_entry, 
+    #         between = catBL,
+    #         type = 2, 
+    #         return_aov = T, 
+    #         detailed = T)
+    
+    # pairwise t-test
+    results <- pairwise.t.test(sample.df$viral_entry,
+                               sample.df$catBL,
+                               paired=FALSE,
+                               alternative="two.sided",
+                               p.adjust= "bonf")
+
+    pval <- results$p.value[2,2]
     }
   )
 
@@ -131,7 +138,6 @@ ggplot(data.frame(pval))+
 
 ## 10. Conclusion
 Now, all that's left is to actually go conduct the experiment in the lab! Unfortunately, that might have to wait for another few months... but in the meantime, there's always room for improvement. Using the statistical skills I learned in this course, I can expand my experimental design to include additional factors (such as the amount of ACE2 receptors on host cells) or even measure my predictor variable, the amount of CatB/L activity, in order to perform a regression analysis.
-
 
 ## References
 [1] Hoffmann, M., Kleine-Weber, H., Schroeder, S., Krüger, N., Herrler, T., Erichsen, S., ... & Müller, M. A. (2020). SARS-CoV-2 cell entry depends on ACE2 and TMPRSS2 and is blocked by a clinically proven protease inhibitor. Cell.
