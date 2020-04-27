@@ -133,8 +133,9 @@ ggplot(data.frame(pval))+
   labs(x="p-value")
 ```
 
-![image](power_analysis.png)
 ![image](monte_carlo.png)
+![image](power_analysis.png)
+
 
 ## 10. Conclusion
 Now, all that's left is to actually go conduct the experiment in the lab! Unfortunately, that might have to wait for another few months... but in the meantime, there's always room for improvement. Using the statistical skills I learned in this course, I can expand my experimental design to include additional factors (such as the amount of ACE2 receptors on host cells) or even measure my predictor variable, the amount of CatB/L activity, in order to perform a regression analysis.
